@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DORA — Interactive Demo</title>
+<meta name="description" content="Learn agentic AI hands-on. No API key needed — interactive demo of all 4 stages.">
+<meta property="og:title" content="DORA — Learn Agentic AI Interactively">
+<meta property="og:description" content="Watch an AI agent decide, observe, reason, and act. No signup, no cost, fully interactive.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0a;--surface:#111;--surface2:#1a1a1a;--border:#2a2a2a;
+  --text:#f0ede8;--muted:#9a9690;--accent:#e8d5a3;
+  --decide:#c9a96e;--observe:#7eb8a0;--reason:#a08ec9;--act:#c97e7e;
+  --fd:'DM Serif Display',serif;--fb:'Outfit',sans-serif;--fm:'DM Mono',monospace;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--fb);font-weight:400;line-height:1.6;min-height:100vh}
+.hero{padding:2.5rem 1.5rem 1.5rem;max-width:680px;margin:0 auto;text-align:center}
+.logo-wrap{display:flex;justify-content:center;margin-bottom:1.2rem}
+.hero-title{font-family:var(--fd);font-size:clamp(2.2rem,7vw,3.5rem);line-height:1;letter-spacing:-.02em;margin-bottom:.5rem}
+.hero-title em{font-style:italic;color:var(--accent)}
+.hero-sub{font-size:clamp(13px,3vw,15px);color:#b8b4ae;max-width:420px;margin:0 auto .8rem}
+.free-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(126,184,160,.1);border:1px solid rgba(126,184,160,.25);border-radius:999px;padding:4px 12px;font-size:12px;color:var(--observe);margin-bottom:1.2rem}
+.acro-row{display:flex;justify-content:center;gap:clamp(10px,3vw,24px);margin:.8rem 0}
+.lp{display:flex;flex-direction:column;align-items:center;gap:4px}
+.lc{font-family:var(--fd);font-size:clamp(1.2rem,4vw,1.8rem);font-weight:700;width:clamp(36px,8vw,50px);height:clamp(36px,8vw,50px);border-radius:10px;display:flex;align-items:center;justify-content:center;border:1px solid}
+.lc.d{background:rgba(201,169,110,.12);color:var(--decide);border-color:rgba(201,169,110,.25)}
+.lc.o{background:rgba(126,184,160,.12);color:var(--observe);border-color:rgba(126,184,160,.25)}
+.lc.r{background:rgba(160,142,201,.12);color:var(--reason);border-color:rgba(160,142,201,.25)}
+.lc.a{background:rgba(201,126,126,.12);color:var(--act);border-color:rgba(201,126,126,.25)}
+.lw{font-size:9px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;font-weight:500}
+.tabs{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:1.2rem}
+.tab{padding:6px 14px;border-radius:999px;font-size:12px;font-weight:500;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:var(--fb);transition:all .15s}
+.tab:hover{border-color:var(--muted);color:var(--text)}
+.tab.active{background:var(--surface2);border-color:var(--accent);color:var(--accent)}
+.panel{max-width:680px;margin:0 auto;padding:0 1rem 4rem}
+.ex{background:var(--surface2);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:#b8b4ae;line-height:1.6;border-left:3px solid}
+.ex.s1{border-color:var(--decide)} .ex.s2{border-color:var(--observe)} .ex.s3{border-color:var(--reason)} .ex.s4{border-color:var(--act)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.25rem 1.5rem;margin-bottom:12px}
+.lbl{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500;margin-bottom:8px}
+.irow{display:flex;gap:8px}
+.irow input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-family:var(--fb);font-size:14px;color:var(--text);outline:none;transition:border-color .2s}
+.irow input:focus{border-color:var(--accent)}
+.irow input::placeholder{color:#6a6660}
+.abtn{background:var(--accent);color:#0a0a0a;border:none;border-radius:10px;padding:10px 18px;font-family:var(--fb);font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap}
+.abtn:disabled{opacity:.35;cursor:not-allowed}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chip{font-size:12px;padding:4px 10px;border-radius:8px;background:var(--surface2);color:#a8a49e;border:1px solid var(--border);cursor:pointer;font-family:var(--fm)}
+.chip:hover{border-color:var(--accent);color:var(--accent)}
+.tlbl{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.ibadge{font-size:10px;padding:2px 7px;border-radius:4px;background:var(--surface2);color:var(--muted);font-family:var(--fm);border:1px solid var(--border)}
+.step{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);align-items:flex-start}
+.step:last-child{border-bottom:none}
+.si{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0;font-family:var(--fm)}
+.si-d{background:rgba(201,169,110,.15);color:var(--decide)}
+.si-o{background:rgba(126,184,160,.15);color:var(--observe)}
+.si-r{background:rgba(160,142,201,.15);color:var(--reason)}
+.si-a{background:rgba(201,126,126,.15);color:var(--act)}
+.si-m{background:rgba(160,142,201,.15);color:var(--reason)}
+.sb{flex:1;min-width:0}
+.st{font-size:13px;color:#e0ddd8;line-height:1.5}
+.sm{font-size:11px;color:#8a8680;font-family:var(--fm);margin-top:2px;word-break:break-all}
+.lsep{display:flex;align-items:center;gap:8px;padding:6px 0}
+.ll{flex:1;height:1px;background:var(--border)}
+.lt{font-size:10px;color:var(--muted);font-family:var(--fm);white-space:nowrap}
+.ans{background:var(--surface2);border-radius:10px;padding:14px 16px;font-size:14px;line-height:1.8;color:var(--text);border-left:3px solid var(--observe);white-space:pre-wrap}
+.stats{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.stat{background:var(--surface2);border-radius:8px;padding:6px 12px;font-size:12px;font-family:var(--fm);color:var(--muted)}
+.stat span{color:var(--text)}
+.mem-panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.25rem 1.5rem;margin-bottom:12px}
+.mem-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.mem-title{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--reason);font-weight:500;display:flex;align-items:center;gap:6px}
+.mem-dot{width:7px;height:7px;border-radius:50%;background:var(--reason)}
+.mem-clr{font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:var(--fm)}
+.mem-empty{font-size:13px;color:var(--muted);font-style:italic}
+.mem-item{display:flex;gap:8px;padding:6px 10px;background:var(--surface2);border-radius:8px;border-left:2px solid var(--reason);margin-bottom:6px}
+.mem-val{font-size:13px;color:#d0cdc8}
+.mem-key{font-size:11px;color:var(--muted);font-family:var(--fm);margin-top:2px}
+.mem-inj{font-size:11px;color:var(--muted);font-family:var(--fm);margin-top:8px;padding:6px 10px;background:rgba(160,142,201,.06);border-radius:6px;border:1px dashed rgba(160,142,201,.2)}
+.orch-lbl{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--act);font-weight:500;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.par-badge{font-size:10px;padding:2px 7px;border-radius:4px;background:rgba(201,126,126,.12);color:var(--act);border:1px solid rgba(201,126,126,.2)}
+.sa-wrap{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.sa{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.sa-hdr{display:flex;align-items:center;gap:8px;padding:10px 14px;cursor:pointer}
+.sa-icon{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;flex-shrink:0;font-family:var(--fm)}
+.sa-name{font-size:13px;font-weight:500;flex:1}
+.sa-status{font-size:11px;color:var(--muted);font-family:var(--fm)}
+.sa-body{padding:0 14px 10px;display:none}
+.sa-body.open{display:block}
+.sa-step{font-size:12px;color:#b0ada8;padding:3px 0;border-bottom:1px solid var(--border);line-height:1.5}
+.sa-step:last-child{border-bottom:none}
+.sa-step span{font-family:var(--fm);color:var(--muted);font-size:11px}
+.mock-note{text-align:center;font-size:11px;color:var(--muted);padding:8px 0 0;font-family:var(--fm)}
+.footer{text-align:center;font-size:12px;color:var(--muted);padding:2rem;border-top:1px solid var(--border)}
+.footer em{color:var(--accent);font-style:normal}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.fi{animation:fadeIn .25s ease forwards}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.pulse{animation:pulse 1.2s ease infinite}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="logo-wrap">
+    <svg width="60" height="60" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="120" height="120" rx="26" fill="#0e0e0e"/>
+      <circle cx="60" cy="60" r="40" stroke="#1e1e1e" stroke-width="1"/>
+      <path d="M60 20 A40 40 0 0 1 100 60" stroke="#c9a96e" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.8"/>
+      <path d="M100 60 A40 40 0 0 1 60 100" stroke="#7eb8a0" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.8"/>
+      <path d="M60 100 A40 40 0 0 1 20 60" stroke="#a08ec9" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.8"/>
+      <path d="M20 60 A40 40 0 0 1 60 20" stroke="#c97e7e" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.8"/>
+      <circle cx="60" cy="20" r="12" fill="#120e00" stroke="#c9a96e" stroke-width="1.2"/>
+      <text x="60" y="24.5" font-family="Georgia,serif" font-size="12" font-weight="700" fill="#c9a96e" text-anchor="middle">D</text>
+      <circle cx="100" cy="60" r="12" fill="#001209" stroke="#7eb8a0" stroke-width="1.2"/>
+      <text x="100" y="64.5" font-family="Georgia,serif" font-size="12" font-weight="700" fill="#7eb8a0" text-anchor="middle">O</text>
+      <circle cx="60" cy="100" r="12" fill="#0d0012" stroke="#a08ec9" stroke-width="1.2"/>
+      <text x="60" y="104.5" font-family="Georgia,serif" font-size="12" font-weight="700" fill="#a08ec9" text-anchor="middle">R</text>
+      <circle cx="20" cy="60" r="12" fill="#120000" stroke="#c97e7e" stroke-width="1.2"/>
+      <text x="20" y="64.5" font-family="Georgia,serif" font-size="12" font-weight="700" fill="#c97e7e" text-anchor="middle">A</text>
+      <circle cx="60" cy="60" r="6" fill="#0f0f0f" stroke="#2a2a2a" stroke-width="1"/>
+      <circle cx="60" cy="60" r="2.5" fill="#e8d5a3"/>
+    </svg>
+  </div>
+  <h1 class="hero-title">Learn <em>agentic</em> AI</h1>
+  <p class="hero-sub">Watch an AI agent decide, observe, reason, and act — step by step.</p>
+  <div class="free-badge"><span style="width:6px;height:6px;border-radius:50%;background:var(--observe);display:inline-block"></span>Interactive demo — no API key, no cost</div>
+  <div class="acro-row">
+    <div class="lp"><div class="lc d">D</div><div class="lw">Decide</div></div>
+    <div class="lp"><div class="lc o">O</div><div class="lw">Observe</div></div>
+    <div class="lp"><div class="lc r">R</div><div class="lw">Reason</div></div>
+    <div class="lp"><div class="lc a">A</div><div class="lw">Act</div></div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" id="tab-1" onclick="switchStage(1)">Stage 1 - Single tool</button>
+    <button class="tab" id="tab-2" onclick="switchStage(2)">Stage 2 - ReAct loop</button>
+    <button class="tab" id="tab-3" onclick="switchStage(3)">Stage 3 - Memory</button>
+    <button class="tab" id="tab-4" onclick="switchStage(4)">Stage 4 - Multi-agent</button>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="ex s1" id="ex-1"><strong style="color:var(--decide)">Stage 1 - Single tool use.</strong> The agent picks one tool, calls it once, observes the result, and answers. The loop always runs exactly twice.</div>
+  <div class="ex s2" id="ex-2" style="display:none"><strong style="color:var(--observe)">Stage 2 - ReAct loop.</strong> The agent reasons and acts in multiple rounds, chaining tools in sequence until the goal is fully complete.</div>
+  <div class="ex s3" id="ex-3" style="display:none"><strong style="color:var(--reason)">Stage 3 - Memory.</strong> The agent remembers facts across sessions. Tell it your name and city — it saves them and uses them next time.</div>
+  <div class="ex s4" id="ex-4" style="display:none"><strong style="color:var(--act)">Stage 4 - Multi-agent.</strong> One orchestrator delegates to 3 specialist agents running in parallel. Results are synthesised into a final briefing.</div>
+
+  <div class="mem-panel" id="mem-panel" style="display:none">
+    <div class="mem-hdr">
+      <div class="mem-title"><div class="mem-dot pulse"></div>Agent memory</div>
+      <button class="mem-clr" onclick="clearMem()">clear</button>
+    </div>
+    <div id="mem-body"><div class="mem-empty">No memories yet. Introduce yourself to start.</div></div>
+    <div class="mem-inj" id="mem-inj" style="display:none"></div>
+  </div>
+
+  <div id="sa-wrap" style="display:none">
+    <div class="orch-lbl">Specialist agents <span class="par-badge">parallel</span></div>
+    <div class="sa-wrap">
+      <div class="sa" id="sa-weather">
+        <div class="sa-hdr" onclick="toggleSA('weather')">
+          <div class="sa-icon" style="background:rgba(201,169,110,.15);color:var(--decide)">W</div>
+          <div class="sa-name">Weather Agent</div>
+          <div class="sa-status" id="sa-w-st">waiting</div>
+        </div>
+        <div class="sa-body" id="sa-w-body"></div>
+      </div>
+      <div class="sa" id="sa-finance">
+        <div class="sa-hdr" onclick="toggleSA('finance')">
+          <div class="sa-icon" style="background:rgba(126,184,160,.15);color:var(--observe)">F</div>
+          <div class="sa-name">Finance Agent</div>
+          <div class="sa-status" id="sa-f-st">waiting</div>
+        </div>
+        <div class="sa-body" id="sa-f-body"></div>
+      </div>
+      <div class="sa" id="sa-time">
+        <div class="sa-hdr" onclick="toggleSA('time')">
+          <div class="sa-icon" style="background:rgba(160,142,201,.15);color:var(--reason)">T</div>
+          <div class="sa-name">Time Agent</div>
+          <div class="sa-status" id="sa-t-st">waiting</div>
+        </div>
+        <div class="sa-body" id="sa-t-body"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="lbl">Ask the agent</div>
+    <div class="irow">
+      <input type="text" id="q" placeholder="e.g. What is the weather in Tokyo?"/>
+      <button class="abtn" id="ask-btn" onclick="run()">Ask</button>
+    </div>
+    <div class="chips" id="chips"></div>
+    <div class="mock-note">Simulated responses based on real AI traces</div>
+  </div>
+
+  <div class="card fi" id="trace-card" style="display:none">
+    <div class="tlbl">Agent trace - the DORA loop <span class="ibadge" id="iter-badge"></span></div>
+    <div id="log"></div>
+  </div>
+
+  <div class="card fi" id="ans-card" style="display:none">
+    <div class="tlbl">Final answer</div>
+    <div class="ans" id="ans"></div>
+    <div class="stats" id="stats"></div>
+  </div>
+</div>
+
+<div class="footer">built by <em>buildjoynow.com</em> - DORA interactive demo - <a href="https://dora.buildjoynow.com" style="color:var(--accent);text-decoration:none">try the live version</a></div>
+
+<script>
+// ── State ─────────────────────────────────────────────────────────
+var stage = 1;
+var MK = 'dora_mock_mem_v1';
+
+// ── Memory ────────────────────────────────────────────────────────
+function loadMem(){try{return JSON.parse(localStorage.getItem(MK)||'[]');}catch(e){return[];}}
+function saveMem(key,val){
+  var m=loadMem();
+  var i=m.findIndex(function(x){return x.key===key;});
+  var item={key:key,val:val,t:new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})};
+  if(i>=0)m[i]=item;else m.push(item);
+  localStorage.setItem(MK,JSON.stringify(m.slice(-20)));
+  renderMem();
+}
+function clearMem(){localStorage.removeItem(MK);renderMem();}
+function getMemVal(key){var m=loadMem();var f=m.find(function(x){return x.key===key;});return f?f.val:null;}
+function renderMem(){
+  var m=loadMem();
+  var b=document.getElementById('mem-body');
+  var inj=document.getElementById('mem-inj');
+  if(!b)return;
+  if(!m.length){b.innerHTML='<div class="mem-empty">No memories yet. Introduce yourself to start.</div>';inj.style.display='none';return;}
+  b.innerHTML=m.map(function(x){return '<div class="mem-item"><div><div class="mem-val">'+x.val+'</div><div class="mem-key">'+x.key+' - saved '+x.t+'</div></div></div>';}).join('');
+  inj.style.display='block';
+  inj.textContent='Injected: '+m.map(function(x){return x.val;}).join(', ');
+}
+
+// ── Input parser — makes responses personal ───────────────────────
+function parseInput(q){
+  var lower = q.toLowerCase();
+  var result = {
+    raw: q,
+    name: null,
+    city: null,
+    city2: null,
+    amount: null,
+    currency_from: 'SGD',
+    currency_to: null,
+    intent: 'unknown'
+  };
+
+  // Extract name patterns: "my name is X", "I am X", "I'm X"
+  var nameMatch = q.match(/(?:my name is|i am|i'm|call me)\s+([A-Za-z]+)/i);
+  if(nameMatch) result.name = nameMatch[1];
+
+  // Extract cities
+  var cities = ['Singapore','Tokyo','London','Bangkok','Dubai','Paris','Sydney','Kuala Lumpur','KL','New York','Berlin','Seoul'];
+  var foundCities = [];
+  cities.forEach(function(c){
+    if(lower.indexOf(c.toLowerCase())!==-1) foundCities.push(c==='KL'?'Kuala Lumpur':c);
+  });
+  if(foundCities.length>0) result.city = foundCities[0];
+  if(foundCities.length>1) result.city2 = foundCities[1];
+
+  // Use remembered city if no city mentioned
+  if(!result.city){
+    var remembered = getMemVal('home_city') || getMemVal('city');
+    if(remembered) result.city = remembered;
+  }
+
+  // Extract amounts
+  var amtMatch = q.match(/(\d+)\s*(?:sgd|usd|gbp|myr|jpy|eur|aud|aed|thb)/i);
+  if(amtMatch) result.amount = parseInt(amtMatch[1]);
+
+  // Extract currency
+  var currencies = ['SGD','USD','GBP','MYR','JPY','EUR','AUD','AED','THB'];
+  var foundCurr = [];
+  currencies.forEach(function(c){if(lower.indexOf(c.toLowerCase())!==-1) foundCurr.push(c);});
+  if(foundCurr.length>0) result.currency_from = foundCurr[0];
+  if(foundCurr.length>1) result.currency_to = foundCurr[1];
+
+  // Detect intent
+  if(/weather|rain|temp|hot|cold|humid|forecast/i.test(q)) result.intent='weather';
+  else if(/time|clock|now|current|timezone/i.test(q)) result.intent='time';
+  else if(/convert|sgd|usd|gbp|myr|jpy|currency|exchange|rate/i.test(q)) result.intent='currency';
+  else if(/\d+\s*[+\-*\/]\s*\d+|divide|multiply|plus|minus|calculate/i.test(q)) result.intent='math';
+  else if(/remember|forget|know about me|who am i/i.test(q)) result.intent='recall';
+  else if(/name is|i am|i'm|call me|based in|from/i.test(q)) result.intent='introduce';
+
+  return result;
+}
+
+// ── Mock data ─────────────────────────────────────────────────────
+var WX = {
+  'Singapore':{temp:31,feels:36,cond:'Humid and hazy',hum:84,wind:8},
+  'Tokyo':{temp:24,feels:22,cond:'Partly cloudy',hum:68,wind:12},
+  'London':{temp:14,feels:12,cond:'Overcast',hum:72,wind:18},
+  'Bangkok':{temp:33,feels:38,cond:'Thunderstorm',hum:88,wind:6},
+  'Dubai':{temp:38,feels:42,cond:'Sunny and hot',hum:45,wind:10},
+  'Paris':{temp:17,feels:15,cond:'Light rain',hum:78,wind:16},
+  'Sydney':{temp:19,feels:17,cond:'Clear skies',hum:55,wind:14},
+  'Kuala Lumpur':{temp:32,feels:38,cond:'Partly cloudy with showers',hum:82,wind:9},
+  'New York':{temp:22,feels:21,cond:'Partly sunny',hum:58,wind:20},
+  'Berlin':{temp:13,feels:11,cond:'Cloudy',hum:70,wind:22},
+  'Seoul':{temp:20,feels:18,cond:'Clear',hum:52,wind:15}
+};
+var TM = {
+  'Singapore':'16:14','Tokyo':'17:14','London':'09:14','Bangkok':'16:14',
+  'Dubai':'12:14','Paris':'10:14','Sydney':'18:14','Kuala Lumpur':'16:14',
+  'New York':'04:14','Berlin':'10:14','Seoul':'17:14'
+};
+var TZ = {
+  'Singapore':'SGT (UTC+8)','Tokyo':'JST (UTC+9)','London':'BST (UTC+1)',
+  'Bangkok':'ICT (UTC+7)','Dubai':'GST (UTC+4)','Paris':'CEST (UTC+2)',
+  'Sydney':'AEST (UTC+10)','Kuala Lumpur':'MYT (UTC+8)','New York':'EDT (UTC-4)',
+  'Berlin':'CEST (UTC+2)','Seoul':'KST (UTC+9)'
+};
+var FX = {
+  'SGD-MYR':3.51,'SGD-USD':0.74,'SGD-GBP':0.58,'SGD-JPY':112.4,
+  'SGD-EUR':0.68,'SGD-AUD':1.14,'SGD-AED':2.72,'SGD-THB':24.5,
+  'USD-SGD':1.35,'USD-MYR':4.72,'MYR-SGD':0.285,'GBP-SGD':1.72,'GBP-USD':1.27
+};
+
+function getWeather(city){
+  var d=WX[city]||{temp:26,feels:24,cond:'Partly cloudy',hum:62,wind:10};
+  return 'Weather in '+city+': '+d.temp+'C (feels '+d.feels+'C), '+d.cond+'. Humidity '+d.hum+'%, wind '+d.wind+' km/h.';
+}
+function getTime(city){
+  var t=TM[city]||'12:00';
+  var tz=TZ[city]||'UTC';
+  return 'Time in '+city+': '+t+' - Sunday, 14 June 2026. ('+tz+')';
+}
+function getRate(from,to,amount){
+  var k=from+'-'+to;
+  var r=FX[k];
+  if(!r)return 'Rate for '+k+' not available.';
+  if(amount){return amount+' '+from+' = '+(amount*r).toFixed(2)+' '+to+' (rate: 1 '+from+' = '+r+' '+to+')';}
+  return '1 '+from+' = '+r+' '+to;
+}
+function calcExpr(expr){
+  try{var s=expr.replace(/[^0-9+\-*\/().\s]/g,'');var r=Function('"use strict";return('+s+')')();return expr+' = '+(Number.isInteger(r)?r:parseFloat(r.toFixed(4))).toLocaleString();}
+  catch(e){return 'Could not evaluate: '+expr;}
+}
+
+// ── Stage config ──────────────────────────────────────────────────
+var CHIPS = {
+  1:[['What is the weather in Tokyo?','Tokyo weather'],['What is 847 multiplied by 23?','Calculator'],['What time is it in London?','London time'],['Is it raining in Bangkok?','Bangkok rain'],['Convert 250 SGD to USD','Currency']],
+  2:[['What is the weather in KL, time there, and 300 SGD in MYR?','KL: weather + time + currency'],['Check weather in Tokyo and time there','Tokyo weather + time'],['Convert 500 SGD to MYR and USD, then weather in Bangkok','3-tool chain'],['Weather in London, time there, 200 SGD to GBP','London full briefing']],
+  3:[['My name is Alex and I am based in Tokyo. What is the weather here?','Introduce yourself'],['I usually travel to Singapore for work. Time and weather there?','Set travel context'],['What do you remember about me?','Test memory recall'],['Check the weather in my home city','Use remembered home city']],
+  4:[['I am flying from Singapore to London. Full briefing - weather both cities, time difference, and 500 SGD in GBP.','Travel briefing'],['Compare Singapore and Tokyo - weather, time, and 300 SGD in JPY.','SG vs Tokyo'],['Heading to Dubai - weather, local time, 400 SGD in AED.','Dubai briefing'],['Weekend trip to Bangkok - weather, local time, 200 SGD in THB.','Bangkok weekend']]
+};
+var PLACEHOLDERS = {
+  1:'e.g. What is the weather in Tokyo?',
+  2:'e.g. Check weather in KL, time there, and 300 SGD in MYR',
+  3:'e.g. My name is Alex and I am based in Tokyo',
+  4:'e.g. I am flying from Singapore to London. Full briefing please.'
+};
+
+// ── Stage switcher ────────────────────────────────────────────────
+function switchStage(n){
+  stage=n;
+  for(var i=1;i<=4;i++){
+    var t=document.getElementById('tab-'+i);
+    if(t) t.className='tab'+(i===n?' active':'');
+    var e=document.getElementById('ex-'+i);
+    if(e) e.style.display=i===n?'block':'none';
+  }
+  document.getElementById('mem-panel').style.display=n===3?'block':'none';
+  document.getElementById('sa-wrap').style.display=n===4?'block':'none';
+  document.getElementById('q').placeholder=PLACEHOLDERS[n];
+  document.getElementById('q').value='';
+  document.getElementById('chips').innerHTML=CHIPS[n].map(function(ch){
+    return '<span class="chip" onclick="setQ(\''+ch[0].replace(/'/g,"\\'")+'\')">' + ch[1] + '</span>';
+  }).join('');
+  document.getElementById('trace-card').style.display='none';
+  document.getElementById('ans-card').style.display='none';
+  document.getElementById('log').innerHTML='';
+  if(n===3) renderMem();
+  if(n===4) resetSA();
+}
+
+function setQ(t){document.getElementById('q').value=t;}
+function toggleSA(n){var b=document.getElementById('sa-'+n[0]+'-body');if(b)b.classList.toggle('open');}
+function resetSA(){
+  ['w','f','t'].forEach(function(n){
+    var s=document.getElementById('sa-'+n+'-st');
+    var b=document.getElementById('sa-'+n+'-body');
+    if(s)s.textContent='waiting';
+    if(b){b.innerHTML='';b.classList.remove('open');}
+  });
+  ['weather','finance','time'].forEach(function(n){
+    var c=document.getElementById('sa-'+n);
+    if(c)c.style.borderColor='var(--border)';
+  });
+}
+
+// ── Animated step writer ──────────────────────────────────────────
+var stepQueue = [];
+var stepRunning = false;
+
+function queueStep(type,title,meta,delay){
+  stepQueue.push({type:type,title:title,meta:meta,delay:delay||0});
+  if(!stepRunning) processQueue();
+}
+function queueSep(n,delay){
+  stepQueue.push({sep:true,n:n,delay:delay||0});
+  if(!stepRunning) processQueue();
+}
+function queueFinal(iters,calls,secs,answer,delay){
+  stepQueue.push({final:true,iters:iters,calls:calls,secs:secs,answer:answer,delay:delay||0});
+  if(!stepRunning) processQueue();
+}
+function queueSALog(sa,text,meta,delay){
+  stepQueue.push({salog:true,sa:sa,text:text,meta:meta,delay:delay||0});
+  if(!stepRunning) processQueue();
+}
+function queueSAStatus(sa,text,col,delay){
+  stepQueue.push({sastatus:true,sa:sa,text:text,col:col,delay:delay||0});
+  if(!stepRunning) processQueue();
+}
+
+function processQueue(){
+  if(!stepQueue.length){stepRunning=false;var btn=document.getElementById('ask-btn');if(btn){btn.disabled=false;btn.textContent='Ask';}return;}
+  stepRunning=true;
+  var item=stepQueue.shift();
+  setTimeout(function(){
+    if(item.sep){
+      var el=document.createElement('div');el.className='lsep fi';
+      el.innerHTML='<div class="ll"></div><div class="lt">loop '+item.n+'</div><div class="ll"></div>';
+      document.getElementById('log').appendChild(el);
+    } else if(item.salog){
+      var sa=item.sa;
+      var b=document.getElementById('sa-'+sa[0]+'-body');
+      if(b){b.classList.add('open');var el=document.createElement('div');el.className='sa-step';el.innerHTML=item.text+(item.meta?' <span>'+item.meta+'</span>':'');b.appendChild(el);}
+    } else if(item.sastatus){
+      var s=document.getElementById('sa-'+item.sa[0]+'-st');
+      var c=document.getElementById('sa-'+item.sa);
+      if(s)s.textContent=item.text;
+      if(c&&item.col)c.style.borderColor=item.col;
+    } else if(item.final){
+      document.getElementById('ans-card').style.display='block';
+      document.getElementById('ans').textContent=item.answer;
+      document.getElementById('stats').innerHTML='<div class="stat">loops <span>'+item.iters+'</span></div><div class="stat">tool calls <span>'+item.calls+'</span></div><div class="stat">time <span>'+item.secs+'s</span></div><div class="stat">stage <span>'+stage+'</span></div>';
+    } else {
+      var icons={d:'D',o:'O',r:'R',a:'A',m:'M'};
+      var cls={d:'si-d',o:'si-o',r:'si-r',a:'si-a',m:'si-m'};
+      var el=document.createElement('div');el.className='step fi';
+      el.innerHTML='<div class="si '+(cls[item.type]||'si-d')+'">'+(icons[item.type]||'D')+'</div><div class="sb"><div class="st">'+item.title+'</div>'+(item.meta?'<div class="sm">'+item.meta+'</div>':'')+'</div>';
+      document.getElementById('log').appendChild(el);
+    }
+    document.getElementById('iter-badge').textContent=countIters()+' iteration'+(countIters()!==1?'s':'');
+    processQueue();
+  },item.delay);
+}
+
+function countIters(){return document.querySelectorAll('.lsep').length+1;}
+
+// ── Main runner ───────────────────────────────────────────────────
+function run(){
+  var q=document.getElementById('q').value.trim();
+  if(!q)return;
+  var btn=document.getElementById('ask-btn');
+  btn.disabled=true;btn.textContent='Running...';
+  document.getElementById('log').innerHTML='';
+  document.getElementById('trace-card').style.display='block';
+  document.getElementById('ans-card').style.display='none';
+  document.getElementById('stats').innerHTML='';
+  document.getElementById('iter-badge').textContent='';
+  stepQueue=[];stepRunning=false;
+
+  var p=parseInput(q);
+
+  if(stage===1) mockStage1(q,p);
+  else if(stage===2) mockStage2(q,p);
+  else if(stage===3) mockStage3(q,p);
+  else if(stage===4) mockStage4(q,p);
+}
+
+// ── Stage 1 mock ──────────────────────────────────────────────────
+function mockStage1(q,p){
+  var tool,toolArgs,toolResult,answer;
+
+  if(p.intent==='weather' && p.city){
+    tool='get_weather'; toolArgs='{"city":"'+p.city+'"}';
+    toolResult=getWeather(p.city);
+    var d=WX[p.city]||{temp:26,cond:'Partly cloudy',hum:62};
+    answer='The weather in '+p.city+' is currently '+d.temp+'C with '+d.cond.toLowerCase()+' conditions. Humidity is at '+d.hum+'%.';
+  } else if(p.intent==='time' && p.city){
+    tool='get_time'; toolArgs='{"city":"'+p.city+'"}';
+    toolResult=getTime(p.city);
+    answer='The current time in '+p.city+' is '+(TM[p.city]||'12:00')+' on Sunday, 14 June 2026.';
+  } else if(p.intent==='currency'){
+    var to=p.currency_to||(p.currency_from==='SGD'?'USD':'SGD');
+    var amt=p.amount||100;
+    tool='get_exchange_rate'; toolArgs='{"from":"'+p.currency_from+'","to":"'+to+'","amount":'+amt+'}';
+    toolResult=getRate(p.currency_from,to,amt);
+    answer=toolResult;
+  } else if(p.intent==='math'){
+    var expr=q.match(/[\d\s+\-*\/().]+/g);
+    var exprStr=expr?expr.join('').trim():'0';
+    tool='calculate'; toolArgs='{"expression":"'+exprStr+'"}';
+    toolResult=calcExpr(exprStr);
+    answer=toolResult;
+  } else {
+    tool='get_weather'; toolArgs='{"city":"Singapore"}';
+    toolResult=getWeather('Singapore');
+    answer='The weather in Singapore is currently 31C, feeling like 36C due to high humidity. Humid and hazy conditions today.';
+  }
+
+  var T=350;
+  queueStep('d','Deciding which tool to use...','sending question + tool definitions to Gemini',T);
+  queueStep('d','Decided to call: <strong>'+tool+'</strong>',toolArgs,T*2);
+  queueStep('o','Observed result: '+toolResult,null,T*3);
+  queueStep('r','Reasoning about the result...','looping back to model',T*4);
+  queueStep('r','Reasoning complete - goal achieved','loop ends here',T*5);
+  queueStep('a','Formulating final answer...',null,T*6);
+  queueFinal(2,1,1.8,answer,T*7);
+}
+
+// ── Stage 2 mock ──────────────────────────────────────────────────
+function mockStage2(q,p){
+  var T=400;
+  var steps=[];
+  var totalCalls=0;
+
+  queueStep('d','Deciding which tool to use...','sending question + tool definitions to Gemini',T);
+
+  if(p.city){
+    steps.push({tool:'get_weather',args:'{"city":"'+p.city+'"}',result:getWeather(p.city)});
+    totalCalls++;
+  }
+  if(p.city){
+    steps.push({tool:'get_time',args:'{"city":"'+p.city+'"}',result:getTime(p.city)});
+    totalCalls++;
+  }
+  if(p.city2){
+    steps.push({tool:'get_weather',args:'{"city":"'+p.city2+'"}',result:getWeather(p.city2)});
+    totalCalls++;
+    steps.push({tool:'get_time',args:'{"city":"'+p.city2+'"}',result:getTime(p.city2)});
+    totalCalls++;
+  }
+  if(p.currency_to||q.toLowerCase().match(/sgd|usd|gbp|myr|jpy/)){
+    var to=p.currency_to||(p.currency_from==='SGD'?'MYR':'SGD');
+    var amt=p.amount||300;
+    steps.push({tool:'get_exchange_rate',args:'{"from":"'+p.currency_from+'","to":"'+to+'","amount":'+amt+'}',result:getRate(p.currency_from,to,amt)});
+    totalCalls++;
+  }
+  if(!steps.length){
+    steps.push({tool:'get_weather',args:'{"city":"Singapore"}',result:getWeather('Singapore')});
+    totalCalls++;
+  }
+
+  var delay=T*2;
+  steps.forEach(function(s,i){
+    if(i>0){queueSep(i+1,delay);delay+=T;}
+    queueStep('d','Decided to call: <strong>'+s.tool+'</strong>',s.args,delay);delay+=T;
+    queueStep('o','Observed result: '+s.result,null,delay);delay+=T;
+    queueStep('r','Reasoning about the result...','looping back to model',delay);delay+=T;
+  });
+
+  queueSep(steps.length+1,delay);delay+=T;
+  queueStep('r','Reasoning complete - goal fully achieved','loop ends here',delay);delay+=T;
+  queueStep('a','Formulating final answer...',null,delay);delay+=T;
+
+  var answerParts=[];
+  if(p.city){var d=WX[p.city]||{temp:26,cond:'Partly cloudy'};answerParts.push(p.city+': '+d.temp+'C, '+d.cond+' ('+TM[p.city]+' local time)');}
+  if(p.city2){var d2=WX[p.city2]||{temp:26,cond:'Partly cloudy'};answerParts.push(p.city2+': '+d2.temp+'C, '+d2.cond+' ('+TM[p.city2]+' local time)');}
+  if(p.currency_to||q.toLowerCase().match(/sgd|myr|usd|gbp/)){
+    var to2=p.currency_to||(p.currency_from==='SGD'?'MYR':'SGD');
+    answerParts.push('Exchange: '+getRate(p.currency_from,to2,p.amount||300));
+  }
+  var answer=answerParts.length?answerParts.join('\n\n'):'Here is the information you requested for '+p.city+'.';
+
+  queueFinal(steps.length+1,totalCalls,(steps.length*1.8).toFixed(1),answer,delay);
+}
+
+// ── Stage 3 mock ──────────────────────────────────────────────────
+function mockStage3(q,p){
+  var T=450;
+  var mem=loadMem();
+  var hasMem=mem.length>0;
+  var userName=p.name||getMemVal('name');
+  var userCity=p.city||getMemVal('home_city');
+
+  // If recalling memory
+  if(p.intent==='recall'){
+    if(hasMem){
+      if(mem.length>0) queueStep('m','Memory loaded - injecting context into prompt',mem.map(function(x){return x.val;}).join(', '),T);
+      queueStep('d','Deciding which tool to use...','no tool needed - answering from memory',T*2);
+      queueStep('r','Reasoning complete - answer found in memory','loop ends here',T*3);
+      queueStep('a','Formulating final answer...',null,T*4);
+      var recalled=mem.map(function(x){return x.key+': '+x.val;}).join('\n');
+      var recallAns='I remember the following about you:\n\n'+recalled;
+      if(userName) recallAns='Hello '+userName+'! Here is what I remember about you:\n\n'+recalled;
+      queueFinal(1,0,1.3,recallAns,T*5);
+    } else {
+      queueStep('d','Deciding which tool to use...','checking memory...',T);
+      queueStep('r','No memories found yet','loop ends here',T*2);
+      queueStep('a','Formulating final answer...',null,T*3);
+      queueFinal(1,0,0.8,'I don\'t have any memories saved about you yet. Try introducing yourself - tell me your name and city!',T*4);
+    }
+    return;
+  }
+
+  // Use remembered home city
+  if(p.intent==='weather' && !p.city && userCity){
+    p.city=userCity;
+  }
+
+  var delay=T;
+  var totalCalls=0;
+  var iters=0;
+
+  if(hasMem){
+    queueStep('m','Memory loaded - injecting context into prompt',mem.map(function(x){return x.val;}).join(', '),delay);delay+=T;
+  }
+
+  queueStep('d','Deciding which tool to use...','sending question + tool definitions to Gemini',delay);delay+=T;
+  iters++;
+
+  if(p.name){
+    queueStep('m','Saving memory: <strong>name</strong>','{"key":"name","value":"'+p.name+'"}',delay);delay+=T;
+    queueStep('m','Memory saved: "name" = "'+p.name+'"',null,delay);delay+=T;
+    saveMem('name',p.name);
+    totalCalls++;iters++;
+    queueSep(iters,delay);delay+=T;
+  }
+
+  if(p.city && !p.name){
+    // city mentioned without name context
+  } else if(p.city && p.name){
+    queueStep('m','Saving memory: <strong>home_city</strong>','{"key":"home_city","value":"'+p.city+'"}',delay);delay+=T;
+    queueStep('m','Memory saved: "home_city" = "'+p.city+'"',null,delay);delay+=T;
+    saveMem('home_city',p.city);
+    totalCalls++;iters++;
+    queueSep(iters,delay);delay+=T;
+  } else if(p.city && p.intent==='introduce'){
+    queueStep('m','Saving memory: <strong>home_city</strong>','{"key":"home_city","value":"'+p.city+'"}',delay);delay+=T;
+    queueStep('m','Memory saved: "home_city" = "'+p.city+'"',null,delay);delay+=T;
+    saveMem('home_city',p.city);
+    totalCalls++;iters++;
+    queueSep(iters,delay);delay+=T;
+  }
+
+  if(p.city){
+    var wxResult=getWeather(p.city);
+    queueStep('d','Decided to call: <strong>get_weather</strong>','{"city":"'+p.city+'"}',delay);delay+=T;
+    queueStep('o','Observed result: '+wxResult,null,delay);delay+=T;
+    queueStep('r','Reasoning about the result...','looping back to model',delay);delay+=T;
+    totalCalls++;iters++;
+    queueSep(iters,delay);delay+=T;
+  }
+
+  queueStep('r','Reasoning complete - goal fully achieved','loop ends here',delay);delay+=T;
+  queueStep('a','Formulating final answer...',null,delay);delay+=T;
+
+  var name=p.name||getMemVal('name');
+  var city=p.city;
+  var wx=city?(WX[city]||{temp:26,cond:'Partly cloudy'}):null;
+
+  var ans='';
+  if(name && city && wx){
+    ans='Great to meet you, '+name+'! I\'ve saved your name and home city.\n\nThe weather in '+city+' right now is '+wx.temp+'C ('+wx.cond.toLowerCase()+').';
+    if(wx.hum) ans+='\n\nHumidity is at '+wx.hum+'% — '+( wx.hum>75?'quite humid, stay hydrated!':'comfortable conditions today.');
+  } else if(name){
+    ans='Great to meet you, '+name+'! I\'ve saved your name. Next time you ask about your city, I\'ll remember you.';
+  } else if(city && wx){
+    ans=(hasMem&&userName?'Welcome back, '+userName+'! ':'')+'The weather in '+city+' is '+wx.temp+'C with '+wx.cond.toLowerCase()+' conditions. Humidity '+wx.hum+'%.';
+  } else {
+    ans='Got it! I\'ve noted that down. What else would you like to know?';
+  }
+
+  queueFinal(iters,totalCalls,(iters*1.5).toFixed(1),ans,delay);
+}
+
+// ── Stage 4 mock ──────────────────────────────────────────────────
+function mockStage4(q,p){
+  var T=300;
+  var city1=p.city||'Singapore';
+  var city2=p.city2||'London';
+  var curr=p.currency_from||'SGD';
+  var currTo=p.currency_to||'GBP';
+  var amount=p.amount||500;
+
+  // Reset and show specialist panels
+  resetSA();
+
+  queueStep('d','Orchestrator: analysing goal and assigning specialists...','dispatching Weather, Finance, Time agents in parallel',T);
+
+  var tasks={
+    weather:'weather in '+city1+(city2?' and '+city2:''),
+    finance:'convert '+amount+' '+curr+' to '+currTo,
+    time:'time difference between '+city1+(city2?' and '+city2:'')
+  };
+
+  queueStep('o','Tasks assigned to specialists',JSON.stringify(tasks).substring(0,100),T*2);
+  queueStep('r','Dispatching all 3 specialists simultaneously...','Promise.all - parallel execution',T*3);
+
+  var delay=T*4;
+
+  // Weather agent
+  queueSALog('weather','Task: weather in '+city1+(city2?' and '+city2:''),null,delay);
+  queueSALog('weather','Called get_weather','{"city":"'+city1+'"}',delay+T);
+  var wx1=WX[city1]||{temp:26,cond:'Partly cloudy',hum:62};
+  queueSALog('weather','Got: '+getWeather(city1),null,delay+T*2);
+  if(city2){
+    queueSALog('weather','Called get_weather','{"city":"'+city2+'"}',delay+T*3);
+    var wx2=WX[city2]||{temp:15,cond:'Cloudy',hum:70};
+    queueSALog('weather','Got: '+getWeather(city2),null,delay+T*4);
+  }
+  queueSAStatus('weather','done ('+(city2?2:1)+' calls)','var(--observe)',delay+T*5);
+
+  // Finance agent
+  queueSALog('finance','Task: convert '+amount+' '+curr+' to '+currTo,null,delay);
+  queueSALog('finance','Called get_exchange_rate','{"from":"'+curr+'","amount":'+amount+',"to":"'+currTo+'"}',delay+T);
+  var fxResult=getRate(curr,currTo,amount);
+  queueSALog('finance','Got: '+fxResult,null,delay+T*2);
+  queueSALog('finance','Done: '+fxResult,null,delay+T*3);
+  queueSAStatus('finance','done (1 calls)','var(--observe)',delay+T*4);
+
+  // Time agent
+  queueSALog('time','Task: time difference between '+city1+(city2?' and '+city2:''),null,delay);
+  queueSALog('time','Called get_time','{"city":"'+city1+'"}',delay+T);
+  queueSALog('time','Got: '+getTime(city1),null,delay+T*2);
+  if(city2){
+    queueSALog('time','Called get_time','{"city":"'+city2+'"}',delay+T*3);
+    queueSALog('time','Got: '+getTime(city2),null,delay+T*4);
+  }
+  queueSAStatus('time','done ('+(city2?2:1)+' calls)','var(--observe)',delay+T*5);
+
+  var specDone=delay+T*6;
+  queueStep('a','All 3 specialists done in 6.2s','waiting before synthesis...',specDone);
+  queueStep('r','Orchestrator synthesising results...','combining specialist outputs',specDone+T*4);
+
+  // Build personalised answer
+  var ans='Here is your full briefing:\n\n';
+  ans+='### Weather\n';
+  ans+=city1+': '+wx1.temp+'C (feels '+(wx1.feels||wx1.temp+2)+'C), '+wx1.cond+'. Humidity '+wx1.hum+'%.\n';
+  if(city2){ans+=city2+': '+(wx2.temp||15)+'C (feels '+(wx2.feels||13)+'C), '+(wx2.cond||'Overcast')+'. Humidity '+(wx2.hum||70)+'%.\n';}
+  ans+='\n### Time\n';
+  ans+=city1+': '+(TM[city1]||'16:14')+' ('+( TZ[city1]||'local time')+')\n';
+  if(city2){
+    ans+=city2+': '+(TM[city2]||'09:14')+' ('+(TZ[city2]||'local time')+')\n';
+    // rough time diff
+    var t1h=parseInt((TM[city1]||'16:14').split(':')[0]);
+    var t2h=parseInt((TM[city2]||'09:14').split(':')[0]);
+    var diff=t1h-t2h;
+    if(diff!==0) ans+='Time difference: '+city1+' is '+Math.abs(diff)+' hour'+(Math.abs(diff)!==1?'s':'')+' '+(diff>0?'ahead of':'behind')+' '+city2+'.\n';
+  }
+  ans+='\n### Currency\n';
+  ans+=fxResult+'\n';
+  if(city1==='Singapore'&&city2==='London') ans+='\nPractical tip: Pack layers for London - quite a change from Singapore\'s heat! And remember to adjust your watch when you land.';
+
+  queueStep('r','Orchestrator synthesis complete','all specialist results combined',specDone+T*8);
+  queueFinal(1,city2?5:3,(specDone/1000+2).toFixed(1),ans,specDone+T*9);
+}
+
+document.getElementById('q').addEventListener('keydown',function(e){if(e.key==='Enter')run();});
+
+// Init
+switchStage(1);
+</script>
+</body>
+</html>
