@@ -119,6 +119,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-weight:40
 .j-cta{margin-top:8px;font-size:12px;padding:5px 12px;border-radius:8px;border:1px solid var(--reason);color:var(--reason);background:rgba(160,142,201,.08);cursor:pointer;font-family:var(--fb);display:inline-block}
 .j-cta:hover{background:rgba(160,142,201,.15)}
 .j-done-badge{font-size:11px;color:var(--observe);font-family:var(--fm);margin-top:4px}
+.j-after{margin-top:4px}
 .next-hint{background:rgba(160,142,201,.08);border:1px solid rgba(160,142,201,.2);border-radius:10px;padding:10px 14px;margin-top:8px;font-size:13px;color:#c8c4be;display:none}
 .next-hint strong{color:var(--reason)}
 .footer{text-align:center;font-size:12px;color:var(--muted);padding:2rem;border-top:1px solid var(--border)}
@@ -186,29 +187,35 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-weight:40
 
   <!-- Stage 3 guided journey -->
   <div class="journey" id="journey">
-    <div class="journey-title">Guided journey — follow these 3 steps</div>
+    <div class="journey-title">3-step memory journey</div>
+
     <div class="j-step active" id="j-step-1">
-      <div class="j-num">1</div>
+      <div class="j-num" id="j-num-1">1</div>
       <div class="j-body">
         <div class="j-title">Introduce yourself</div>
-        <div class="j-desc">Tell the agent your name and home city. Watch it save both to memory using the <strong>save_memory</strong> tool.</div>
-        <div class="j-cta" onclick="setJourneyQ(1)">Try: "My name is [your name] and I live in [your city]"</div>
+        <div class="j-desc">Tell the agent your name and home city. Watch it use the <strong>save_memory</strong> tool to save both facts to your browser.</div>
+        <div class="j-cta" id="j-cta-1" onclick="setJourneyQ(1)">Type your intro below — e.g. "My name is Alex and I live in Tokyo"</div>
+        <div class="j-after" id="j-after-1" style="display:none"></div>
       </div>
     </div>
+
     <div class="j-step" id="j-step-2">
-      <div class="j-num">2</div>
+      <div class="j-num" id="j-num-2">2</div>
       <div class="j-body">
-        <div class="j-title">Ask using your name</div>
-        <div class="j-desc">Ask about your city weather. Watch the agent inject its memory and personalise the answer with your name.</div>
-        <div class="j-cta" onclick="setJourneyQ(2)" style="display:none">Try: "What is the weather like where I live?"</div>
+        <div class="j-title">Ask about your city</div>
+        <div class="j-desc">Ask about the weather where you live. The agent will inject its saved memory and address you by name in the answer.</div>
+        <div class="j-cta" id="j-cta-2" onclick="setJourneyQ(2)" style="display:none">Click to fill: "What is the weather like where I live?"</div>
+        <div class="j-after" id="j-after-2" style="display:none"></div>
       </div>
     </div>
+
     <div class="j-step" id="j-step-3">
-      <div class="j-num">3</div>
+      <div class="j-num" id="j-num-3">3</div>
       <div class="j-body">
-        <div class="j-title">Refresh the page — then ask what it remembers</div>
-        <div class="j-desc">After refreshing, ask "What do you remember about me?" — zero tool calls, pure memory recall. This is the magic moment.</div>
-        <div class="j-cta" onclick="setJourneyQ(3)" style="display:none">Try: "What do you remember about me?"</div>
+        <div class="j-title">Refresh the page — then test recall</div>
+        <div class="j-desc">Refresh this page, come back to Stage 3, and ask what the agent remembers. It will answer with <strong>zero tool calls</strong> — pure memory from localStorage.</div>
+        <div class="j-cta" id="j-cta-3" onclick="setJourneyQ(3)" style="display:none">Click to fill: "What do you remember about me?"</div>
+        <div class="j-after" id="j-after-3" style="display:none"></div>
       </div>
     </div>
   </div>
@@ -272,7 +279,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-weight:40
   </div>
 </div>
 
-<div class="footer">built by <em>buildjoynow.com</em> - DORA interactive demo - <a href="https://dora.buildjoynow.com" style="color:var(--accent);text-decoration:none">try the live version</a></div>
+<div class="footer">&copy; 2026 <em>buildjoynow.com</em> &middot; DORA interactive demo &middot; All rights reserved</div>
 
 <script>
 // ── State ─────────────────────────────────────────────────────────
@@ -433,6 +440,9 @@ function switchStage(n){
     if(e) e.style.display=i===n?'block':'none';
   }
   document.getElementById('mem-panel').style.display=n===3?'block':'none';
+  document.getElementById('insight').style.display='none';
+  document.getElementById('insight-text').innerHTML='';
+  document.getElementById('insight-compare').innerHTML='';
   document.getElementById('journey').style.display=n===3?'block':'none';
   document.getElementById('next-hint').style.display='none';
   if(n===3) initJourney();
@@ -519,14 +529,32 @@ function processQueue(){
       } else if(stage===3){
         var isRecall=item.calls===0;
         if(isRecall){
-          showInsight('The agent answered using <strong>zero tool calls</strong>. It read from its memory — facts saved in your browser from a previous conversation — and answered instantly. No API needed, no data fetched. Pure memory recall.',[{label:'Tool calls',val:'0 (memory only)'},{label:'Loops',val:'1'},{label:'Time',val:item.secs+'s'}]);
+          // Step 3 complete — show full 3-step summary
+          var name=getMemVal('name')||'you';
+          showInsight(
+            '<strong>Step 3 — Memory recall complete.</strong> The agent answered with zero tool calls. It read facts from localStorage and responded instantly — no server, no API, no cost.<br><br>' +
+            '<strong style="color:var(--reason)">Here is the full memory journey you just completed:</strong><br><br>' +
+            '<strong>Step 1 — Introduce:</strong> The agent called save_memory twice to store your name and city. These facts persist in your browser across page refreshes.<br><br>' +
+            '<strong>Step 2 — Use memory:</strong> The agent injected saved facts into its system prompt before calling get_weather. It personalised the answer using context it remembered — not just what you typed.<br><br>' +
+            '<strong>Step 3 — Recall:</strong> After a page refresh, the agent read from localStorage and answered with zero tool calls. 1 loop, 1.3s. Compare to Step 1 which needed 4 loops and 3 tool calls for the same result.',
+            [{label:'Step 1 calls',val:'3 (2 saves + 1 fetch)'},{label:'Step 2 calls',val:'1 (fetch only)'},{label:'Step 3 calls',val:'0 (memory only)'},{label:'Speed gain',val:'4x faster'}]
+          );
           advanceJourney(4);
         } else if(journeyStep===1 && item.calls>0){
           advanceJourney(2);
-          showInsight('The agent saved facts about you using the <strong>save_memory</strong> tool, then fetched real data. Notice the M steps in the trace — those are memory writes. These facts are now stored in your browser and will survive a page refresh.',[{label:'Memories saved',val:(item.calls-1)},{label:'Data fetches',val:'1'},{label:'Total calls',val:item.calls}]);
+          showInsight(
+            '<strong>Step 1 complete — facts saved.</strong> Watch the M (memory) steps in the trace above. The agent called save_memory twice — once for your name, once for your city. These facts are now stored in your browser localStorage.<br><br>' +
+            'The agent then called get_weather to fetch real conditions. Notice how it sequenced saves before fetches — it prioritised building context first.',
+            [{label:'Memory saves',val:(item.calls-1)},{label:'Data fetches',val:'1'},{label:'Persists after refresh',val:'Yes'}]
+          );
         } else {
-          showInsight('The agent injected its memories into the system prompt before making any API call. It knew who you are before the conversation even started — that is what makes Stage 3 feel personal.',[{label:'Loops',val:item.iters},{label:'Tool calls',val:item.calls},{label:'Memory used',val:'Yes'}]);
           if(journeyStep===2) advanceJourney(3);
+          var name=getMemVal('name')||'you';
+          showInsight(
+            '<strong>Step 2 complete — memory in action.</strong> See the M step at the top of the trace — that was the agent reading its memories and injecting them into the system prompt before making any API call.<br><br>' +
+            'The agent already knew who you are before it read your question. That is why the answer addressed you personally. This is what stateful AI feels like.',
+            [{label:'Loops',val:item.iters},{label:'Tool calls',val:item.calls},{label:'Memory injected',val:'Yes'},{label:'Personalised',val:'Yes'}]
+          );
         }
       } else if(stage===4){
         showInsight('The orchestrator ran <strong>3 specialist agents in parallel</strong> — Weather, Finance, and Time — each with its own tools and focus. Then it synthesised all results into one coherent answer. Parallel execution means all specialists work simultaneously, not one after another.',[{label:'Specialists',val:'3 parallel'},{label:'Total tool calls',val:item.calls},{label:'Sequential would take',val:'~18s'},{label:'Actual time',val:item.secs+'s'}]);
@@ -888,15 +916,34 @@ function setActiveStep(n){
 function advanceJourney(n){
   setActiveStep(n);
   var hint=document.getElementById('next-hint');
+  hint.style.display='none';
+
   if(n===2){
-    hint.style.display='block';
-    hint.innerHTML='<strong>Step 1 complete.</strong> Memory saved. Now try Step 2 above — ask about the weather where you live.';
+    // Show after-Step-1 instruction inside the step
+    var a1=document.getElementById('j-after-1');
+    if(a1){
+      a1.style.display='block';
+      a1.innerHTML='<div style="margin-top:8px;padding:8px 12px;background:rgba(126,184,160,.08);border-radius:8px;border-left:2px solid var(--observe);font-size:12px;color:#b8b4ae">Memory saved. Now do <strong style="color:var(--observe)">Step 2</strong> — click the button above to ask about your city.</div>';
+    }
+    // Unlock Step 2 CTA
+    var c2=document.getElementById('j-cta-2');
+    if(c2) c2.style.display='inline-block';
+
   } else if(n===3){
-    hint.style.display='block';
-    hint.innerHTML='<strong>Step 2 complete.</strong> The agent used its memory to personalise your answer. Now <strong>refresh the page</strong>, come back to Stage 3, and try Step 3 — ask what it remembers about you.';
+    var a2=document.getElementById('j-after-2');
+    if(a2){
+      a2.style.display='block';
+      a2.innerHTML='<div style="margin-top:8px;padding:8px 12px;background:rgba(160,142,201,.08);border-radius:8px;border-left:2px solid var(--reason);font-size:12px;color:#b8b4ae">The agent used memory to personalise your answer. Now for the magic: <strong style="color:var(--reason)">refresh this page</strong>, come back to Stage 3, then do Step 3.</div>';
+    }
+    var c3=document.getElementById('j-cta-3');
+    if(c3) c3.style.display='inline-block';
+
   } else if(n>3){
-    hint.style.display='block';
-    hint.innerHTML='<strong>Journey complete!</strong> You just experienced the full memory cycle: save facts, use them, persist across sessions. This is Stage 3 — stateful AI.';
+    var a3=document.getElementById('j-after-3');
+    if(a3){
+      a3.style.display='block';
+      a3.innerHTML='<div style="margin-top:8px;padding:8px 12px;background:rgba(201,169,110,.08);border-radius:8px;border-left:2px solid var(--accent);font-size:12px;color:#b8b4ae"><strong style="color:var(--accent)">Journey complete!</strong> You experienced the full memory cycle across 3 steps. Scroll down to see the full explanation.</div>';
+    }
   }
 }
 
