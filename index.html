@@ -94,6 +94,33 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-weight:40
 .sa-step:last-child{border-bottom:none}
 .sa-step span{font-family:var(--fm);color:var(--muted);font-size:11px}
 .mock-note{text-align:center;font-size:11px;color:var(--muted);padding:8px 0 0;font-family:var(--fm)}
+/* insight card */
+.insight{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-top:10px;display:none}
+.insight-title{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.insight-bulb{font-size:14px}
+.insight-text{font-size:13px;color:#c8c4be;line-height:1.7}
+.insight-compare{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.ic-box{flex:1;min-width:120px;background:var(--surface);border-radius:8px;padding:8px 12px;border:1px solid var(--border)}
+.ic-label{font-size:10px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}
+.ic-val{font-size:13px;color:var(--text);font-family:var(--fm)}
+/* guided journey */
+.journey{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.25rem 1.5rem;margin-bottom:12px;display:none}
+.journey-title{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--reason);font-weight:500;margin-bottom:12px}
+.j-step{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border);opacity:.4;transition:opacity .3s}
+.j-step:last-child{border-bottom:none}
+.j-step.active{opacity:1}
+.j-step.done{opacity:.6}
+.j-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;flex-shrink:0;font-family:var(--fm);border:1px solid var(--border);background:var(--surface2);color:var(--muted)}
+.j-step.active .j-num{background:rgba(160,142,201,.15);border-color:var(--reason);color:var(--reason)}
+.j-step.done .j-num{background:rgba(126,184,160,.15);border-color:var(--observe);color:var(--observe)}
+.j-body{flex:1}
+.j-title{font-size:14px;font-weight:500;color:var(--text);margin-bottom:2px}
+.j-desc{font-size:12px;color:var(--muted);line-height:1.5}
+.j-cta{margin-top:8px;font-size:12px;padding:5px 12px;border-radius:8px;border:1px solid var(--reason);color:var(--reason);background:rgba(160,142,201,.08);cursor:pointer;font-family:var(--fb);display:inline-block}
+.j-cta:hover{background:rgba(160,142,201,.15)}
+.j-done-badge{font-size:11px;color:var(--observe);font-family:var(--fm);margin-top:4px}
+.next-hint{background:rgba(160,142,201,.08);border:1px solid rgba(160,142,201,.2);border-radius:10px;padding:10px 14px;margin-top:8px;font-size:13px;color:#c8c4be;display:none}
+.next-hint strong{color:var(--reason)}
 .footer{text-align:center;font-size:12px;color:var(--muted);padding:2rem;border-top:1px solid var(--border)}
 .footer em{color:var(--accent);font-style:normal}
 @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
@@ -127,7 +154,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-weight:40
   </div>
   <h1 class="hero-title">Learn <em>agentic</em> AI</h1>
   <p class="hero-sub">Watch an AI agent decide, observe, reason, and act — step by step.</p>
-  <div class="free-badge"><span style="width:6px;height:6px;border-radius:50%;background:var(--observe);display:inline-block"></span>Interactive demo — no API key, no cost</div>
+  <div class="free-badge"><span style="width:6px;height:6px;border-radius:50%;background:var(--observe);display:inline-block"></span>Interactive demo — no cost to visitors</div>
   <div class="acro-row">
     <div class="lp"><div class="lc d">D</div><div class="lw">Decide</div></div>
     <div class="lp"><div class="lc o">O</div><div class="lw">Observe</div></div>
@@ -156,6 +183,36 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-weight:40
     <div id="mem-body"><div class="mem-empty">No memories yet. Introduce yourself to start.</div></div>
     <div class="mem-inj" id="mem-inj" style="display:none"></div>
   </div>
+
+  <!-- Stage 3 guided journey -->
+  <div class="journey" id="journey">
+    <div class="journey-title">Guided journey — follow these 3 steps</div>
+    <div class="j-step active" id="j-step-1">
+      <div class="j-num">1</div>
+      <div class="j-body">
+        <div class="j-title">Introduce yourself</div>
+        <div class="j-desc">Tell the agent your name and home city. Watch it save both to memory using the <strong>save_memory</strong> tool.</div>
+        <div class="j-cta" onclick="setJourneyQ(1)">Try: "My name is [your name] and I live in [your city]"</div>
+      </div>
+    </div>
+    <div class="j-step" id="j-step-2">
+      <div class="j-num">2</div>
+      <div class="j-body">
+        <div class="j-title">Ask using your name</div>
+        <div class="j-desc">Ask about your city weather. Watch the agent inject its memory and personalise the answer with your name.</div>
+        <div class="j-cta" onclick="setJourneyQ(2)" style="display:none">Try: "What is the weather like where I live?"</div>
+      </div>
+    </div>
+    <div class="j-step" id="j-step-3">
+      <div class="j-num">3</div>
+      <div class="j-body">
+        <div class="j-title">Refresh the page — then ask what it remembers</div>
+        <div class="j-desc">After refreshing, ask "What do you remember about me?" — zero tool calls, pure memory recall. This is the magic moment.</div>
+        <div class="j-cta" onclick="setJourneyQ(3)" style="display:none">Try: "What do you remember about me?"</div>
+      </div>
+    </div>
+  </div>
+  <div class="next-hint" id="next-hint"></div>
 
   <div id="sa-wrap" style="display:none">
     <div class="orch-lbl">Specialist agents <span class="par-badge">parallel</span></div>
@@ -206,6 +263,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-weight:40
     <div class="tlbl">Final answer</div>
     <div class="ans" id="ans"></div>
     <div class="stats" id="stats"></div>
+  </div>
+
+  <div class="insight fi" id="insight">
+    <div class="insight-title"><span class="insight-bulb">💡</span>What just happened</div>
+    <div class="insight-text" id="insight-text"></div>
+    <div class="insight-compare" id="insight-compare"></div>
   </div>
 </div>
 
@@ -370,6 +433,9 @@ function switchStage(n){
     if(e) e.style.display=i===n?'block':'none';
   }
   document.getElementById('mem-panel').style.display=n===3?'block':'none';
+  document.getElementById('journey').style.display=n===3?'block':'none';
+  document.getElementById('next-hint').style.display='none';
+  if(n===3) initJourney();
   document.getElementById('sa-wrap').style.display=n===4?'block':'none';
   document.getElementById('q').placeholder=PLACEHOLDERS[n];
   document.getElementById('q').value='';
@@ -445,6 +511,26 @@ function processQueue(){
       document.getElementById('ans-card').style.display='block';
       document.getElementById('ans').textContent=item.answer;
       document.getElementById('stats').innerHTML='<div class="stat">loops <span>'+item.iters+'</span></div><div class="stat">tool calls <span>'+item.calls+'</span></div><div class="stat">time <span>'+item.secs+'s</span></div><div class="stat">stage <span>'+stage+'</span></div>';
+      document.getElementById('insight').style.display='none';
+      if(stage===1){
+        showInsight('The agent <strong>Decided</strong> to use one tool based on your question type. It <strong>Observed</strong> the result, <strong>Reasoned</strong> it had everything it needed, then <strong>Acted</strong> with a final answer. Every Stage 1 run follows this exact pattern.',[{label:'Loops',val:item.iters},{label:'Tool calls',val:item.calls},{label:'Always fixed',val:'Yes'}]);
+      } else if(stage===2){
+        showInsight('The agent looped <strong>'+item.iters+' times</strong> because your question had multiple parts. It chained tools in sequence — each loop calling one tool, observing the result, then deciding what to fetch next. Compare this to Stage 1 which always runs exactly 2 loops.',[{label:'Stage 1 loops',val:'Always 2'},{label:'Stage 2 loops',val:item.iters+' this run'},{label:'Tool calls',val:item.calls}]);
+      } else if(stage===3){
+        var isRecall=item.calls===0;
+        if(isRecall){
+          showInsight('The agent answered using <strong>zero tool calls</strong>. It read from its memory — facts saved in your browser from a previous conversation — and answered instantly. No API needed, no data fetched. Pure memory recall.',[{label:'Tool calls',val:'0 (memory only)'},{label:'Loops',val:'1'},{label:'Time',val:item.secs+'s'}]);
+          advanceJourney(4);
+        } else if(journeyStep===1 && item.calls>0){
+          advanceJourney(2);
+          showInsight('The agent saved facts about you using the <strong>save_memory</strong> tool, then fetched real data. Notice the M steps in the trace — those are memory writes. These facts are now stored in your browser and will survive a page refresh.',[{label:'Memories saved',val:(item.calls-1)},{label:'Data fetches',val:'1'},{label:'Total calls',val:item.calls}]);
+        } else {
+          showInsight('The agent injected its memories into the system prompt before making any API call. It knew who you are before the conversation even started — that is what makes Stage 3 feel personal.',[{label:'Loops',val:item.iters},{label:'Tool calls',val:item.calls},{label:'Memory used',val:'Yes'}]);
+          if(journeyStep===2) advanceJourney(3);
+        }
+      } else if(stage===4){
+        showInsight('The orchestrator ran <strong>3 specialist agents in parallel</strong> — Weather, Finance, and Time — each with its own tools and focus. Then it synthesised all results into one coherent answer. Parallel execution means all specialists work simultaneously, not one after another.',[{label:'Specialists',val:'3 parallel'},{label:'Total tool calls',val:item.calls},{label:'Sequential would take',val:'~18s'},{label:'Actual time',val:item.secs+'s'}]);
+      }
     } else {
       var icons={d:'D',o:'O',r:'R',a:'A',m:'M'};
       var cls={d:'si-d',o:'si-o',r:'si-r',a:'si-a',m:'si-m'};
@@ -760,6 +846,90 @@ function mockStage4(q,p){
 }
 
 document.getElementById('q').addEventListener('keydown',function(e){if(e.key==='Enter')run();});
+
+// ── Journey state ─────────────────────────────────────────────────
+var journeyStep = 1;
+var journeyName = null;
+var journeyCity = null;
+
+function initJourney(){
+  var mem = loadMem();
+  var hasName = mem.find(function(x){return x.key==='name';});
+  var hasCity = mem.find(function(x){return x.key==='home_city';});
+  if(hasName && hasCity){
+    journeyName = hasName.val;
+    journeyCity = hasCity.val;
+    advanceJourney(3);
+  } else {
+    journeyStep = 1;
+    setActiveStep(1);
+  }
+}
+
+function setActiveStep(n){
+  for(var i=1;i<=3;i++){
+    var el=document.getElementById('j-step-'+i);
+    if(!el)continue;
+    el.className='j-step'+(i===n?' active':i<n?' done':'');
+    var cta=el.querySelector('.j-cta');
+    if(cta) cta.style.display=i===n?'inline-block':'none';
+    var badge=el.querySelector('.j-done-badge');
+    if(badge) badge.remove();
+    if(i<n){
+      var done=document.createElement('div');
+      done.className='j-done-badge';
+      done.textContent='Done';
+      el.querySelector('.j-body').appendChild(done);
+    }
+  }
+  journeyStep=n;
+}
+
+function advanceJourney(n){
+  setActiveStep(n);
+  var hint=document.getElementById('next-hint');
+  if(n===2){
+    hint.style.display='block';
+    hint.innerHTML='<strong>Step 1 complete.</strong> Memory saved. Now try Step 2 above — ask about the weather where you live.';
+  } else if(n===3){
+    hint.style.display='block';
+    hint.innerHTML='<strong>Step 2 complete.</strong> The agent used its memory to personalise your answer. Now <strong>refresh the page</strong>, come back to Stage 3, and try Step 3 — ask what it remembers about you.';
+  } else if(n>3){
+    hint.style.display='block';
+    hint.innerHTML='<strong>Journey complete!</strong> You just experienced the full memory cycle: save facts, use them, persist across sessions. This is Stage 3 — stateful AI.';
+  }
+}
+
+function setJourneyQ(step){
+  if(step===1){
+    document.getElementById('q').value='My name is [your name] and I live in Singapore';
+    document.getElementById('q').select();
+    document.getElementById('q').focus();
+  } else if(step===2){
+    var city=journeyCity||getMemVal('home_city')||'Singapore';
+    document.getElementById('q').value='What is the weather like where I live?';
+  } else if(step===3){
+    document.getElementById('q').value='What do you remember about me?';
+  }
+}
+
+// ── Insight card ──────────────────────────────────────────────────
+function showInsight(text,comparisons){
+  var card=document.getElementById('insight');
+  var textEl=document.getElementById('insight-text');
+  var compEl=document.getElementById('insight-compare');
+  card.style.display='block';
+  textEl.innerHTML=text;
+  compEl.innerHTML='';
+  if(comparisons){
+    comparisons.forEach(function(c){
+      var box=document.createElement('div');
+      box.className='ic-box';
+      box.innerHTML='<div class="ic-label">'+c.label+'</div><div class="ic-val">'+c.val+'</div>';
+      compEl.appendChild(box);
+    });
+  }
+}
 
 // Init
 switchStage(1);
