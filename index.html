@@ -187,39 +187,44 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-weight:40
 
   <!-- Stage 3 guided journey -->
   <div class="journey" id="journey">
-    <div class="journey-title">3-step memory journey</div>
-
-    <div class="j-step active" id="j-step-1">
-      <div class="j-num" id="j-num-1">1</div>
-      <div class="j-body">
-        <div class="j-title">Introduce yourself</div>
-        <div class="j-desc">Tell the agent your name and home city. Watch it use the <strong>save_memory</strong> tool to save both facts to your browser.</div>
-        <div class="j-cta" id="j-cta-1" onclick="setJourneyQ(1)">Type your intro below — e.g. "My name is Alex and I live in Tokyo"</div>
-        <div class="j-after" id="j-after-1" style="display:none"></div>
+    <div class="journey-title">Memory journey</div>
+    <div class="j-steps">
+      <div class="j-pill active" id="jp-1">
+        <div class="j-circle">1</div>
+        <div class="j-pill-label">Introduce</div>
+      </div>
+      <div class="j-connector" id="jc-1"></div>
+      <div class="j-pill" id="jp-2">
+        <div class="j-circle">2</div>
+        <div class="j-pill-label">Use memory</div>
+      </div>
+      <div class="j-connector" id="jc-2"></div>
+      <div class="j-pill" id="jp-3">
+        <div class="j-circle">3</div>
+        <div class="j-pill-label">Recall</div>
       </div>
     </div>
-
-    <div class="j-step" id="j-step-2">
-      <div class="j-num" id="j-num-2">2</div>
-      <div class="j-body">
-        <div class="j-title">Ask about your city</div>
-        <div class="j-desc">Ask about the weather where you live. The agent will inject its saved memory and address you by name in the answer.</div>
-        <div class="j-cta" id="j-cta-2" onclick="setJourneyQ(2)" style="display:none">Click to fill: "What is the weather like where I live?"</div>
-        <div class="j-after" id="j-after-2" style="display:none"></div>
+    <div class="j-content">
+      <div class="j-card active" id="jcard-1">
+        <div class="j-card-title">Step 1 — Introduce yourself</div>
+        <div class="j-card-desc">Tell the agent your name and home city. It will save both as memories using the save_memory tool.</div>
+        <span class="j-btn" onclick="setJourneyQ(1)">Fill example</span>
+        <div class="j-next" id="jnext-1"></div>
       </div>
-    </div>
-
-    <div class="j-step" id="j-step-3">
-      <div class="j-num" id="j-num-3">3</div>
-      <div class="j-body">
-        <div class="j-title">Refresh the page — then test recall</div>
-        <div class="j-desc">Refresh this page, come back to Stage 3, and ask what the agent remembers. It will answer with <strong>zero tool calls</strong> — pure memory from localStorage.</div>
-        <div class="j-cta" id="j-cta-3" onclick="setJourneyQ(3)" style="display:none">Click to fill: "What do you remember about me?"</div>
-        <div class="j-after" id="j-after-3" style="display:none"></div>
+      <div class="j-card" id="jcard-2">
+        <div class="j-card-title">Step 2 — Use memory</div>
+        <div class="j-card-desc">Ask about the weather where you live. The agent injects saved memory into its prompt and addresses you by name.</div>
+        <span class="j-btn" onclick="setJourneyQ(2)">Fill example</span>
+        <div class="j-next" id="jnext-2"></div>
+      </div>
+      <div class="j-card" id="jcard-3">
+        <div class="j-card-title">Step 3 — Recall after refresh</div>
+        <div class="j-card-desc">Refresh this page, return to Stage 3, and ask what the agent remembers. Zero tool calls — pure memory.</div>
+        <span class="j-btn" onclick="setJourneyQ(3)">Fill example</span>
+        <div class="j-next" id="jnext-3"></div>
       </div>
     </div>
   </div>
-  <div class="next-hint" id="next-hint"></div>
 
   <div id="sa-wrap" style="display:none">
     <div class="orch-lbl">Specialist agents <span class="par-badge">parallel</span></div>
@@ -270,6 +275,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-weight:40
     <div class="tlbl">Final answer</div>
     <div class="ans" id="ans"></div>
     <div class="stats" id="stats"></div>
+    <div class="token-est" id="token-est" style="display:none"><div class="token-dot"></div><span id="token-text"></span></div>
   </div>
 
   <div class="insight fi" id="insight">
@@ -278,6 +284,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-weight:40
     <div class="insight-compare" id="insight-compare"></div>
   </div>
 </div>
+
+<div class="scroll-arrow" id="scroll-arrow" onclick="scrollDown()">&#8964;</div>
 
 <div class="footer">&copy; 2026 <em>buildjoynow.com</em> &middot; DORA interactive demo &middot; All rights reserved</div>
 
@@ -443,6 +451,8 @@ function switchStage(n){
   document.getElementById('insight').style.display='none';
   document.getElementById('insight-text').innerHTML='';
   document.getElementById('insight-compare').innerHTML='';
+  var te=document.getElementById('token-est'); if(te) te.style.display='none';
+  var sa=document.getElementById('scroll-arrow'); if(sa) sa.style.display='none';
   document.getElementById('journey').style.display=n===3?'block':'none';
   document.getElementById('next-hint').style.display='none';
   if(n===3) initJourney();
@@ -522,6 +532,7 @@ function processQueue(){
       document.getElementById('ans').textContent=item.answer;
       document.getElementById('stats').innerHTML='<div class="stat">loops <span>'+item.iters+'</span></div><div class="stat">tool calls <span>'+item.calls+'</span></div><div class="stat">time <span>'+item.secs+'s</span></div><div class="stat">stage <span>'+stage+'</span></div>';
       document.getElementById('insight').style.display='none';
+      showTokenEst(stage);
       if(stage===1){
         showInsight('The agent <strong>Decided</strong> to use one tool based on your question type. It <strong>Observed</strong> the result, <strong>Reasoned</strong> it had everything it needed, then <strong>Acted</strong> with a final answer. Every Stage 1 run follows this exact pattern.',[{label:'Loops',val:item.iters},{label:'Tool calls',val:item.calls},{label:'Always fixed',val:'Yes'}]);
       } else if(stage===2){
@@ -875,89 +886,109 @@ function mockStage4(q,p){
 
 document.getElementById('q').addEventListener('keydown',function(e){if(e.key==='Enter')run();});
 
+// ── Token estimates ───────────────────────────────────────────────
+var TOKEN_EST = {
+  1: {tokens:420,  cost:'~$0.0003', note:'1 tool call, 2 loops'},
+  2: {tokens:1800, cost:'~$0.0014', note:'avg 5 tool calls, 6 loops'},
+  3: {tokens:950,  cost:'~$0.0007', note:'memory saves + 1 fetch (first run)'},
+  4: {tokens:3200, cost:'~$0.0025', note:'orchestrator + 3 specialists + synthesis'}
+};
+
+function showTokenEst(stageN){
+  var el=document.getElementById('token-est');
+  var txt=document.getElementById('token-text');
+  if(!el||!txt) return;
+  var e=TOKEN_EST[stageN];
+  if(!e){el.style.display='none';return;}
+  el.style.display='flex';
+  txt.textContent='~'+e.tokens+' tokens per run ('+e.cost+' on Claude Sonnet) · '+e.note;
+}
+
+// ── Scroll arrow ──────────────────────────────────────────────────
+function scrollDown(){
+  window.scrollBy({top: window.innerHeight * 0.7, behavior:'smooth'});
+}
+
+function checkScroll(){
+  var arrow=document.getElementById('scroll-arrow');
+  if(!arrow) return;
+  var atBottom=(window.innerHeight+window.scrollY)>=document.body.offsetHeight-60;
+  arrow.style.display=atBottom?'none':'flex';
+}
+
+window.addEventListener('scroll', checkScroll, {passive:true});
+setTimeout(checkScroll, 800);
+
 // ── Journey state ─────────────────────────────────────────────────
 var journeyStep = 1;
-var journeyName = null;
-var journeyCity = null;
 
 function initJourney(){
-  var mem = loadMem();
-  var hasName = mem.find(function(x){return x.key==='name';});
-  var hasCity = mem.find(function(x){return x.key==='home_city';});
+  var hasName = getMemVal('name');
+  var hasCity = getMemVal('home_city');
   if(hasName && hasCity){
-    journeyName = hasName.val;
-    journeyCity = hasCity.val;
-    advanceJourney(3);
+    setJStep(1,'done'); setJStep(2,'done'); setJStep(3,'active');
+    journeyStep=3;
   } else {
-    journeyStep = 1;
-    setActiveStep(1);
+    setJStep(1,'active'); setJStep(2,''); setJStep(3,'');
+    journeyStep=1;
   }
-}
-
-function setActiveStep(n){
+  // Show current card
   for(var i=1;i<=3;i++){
-    var el=document.getElementById('j-step-'+i);
-    if(!el)continue;
-    el.className='j-step'+(i===n?' active':i<n?' done':'');
-    var cta=el.querySelector('.j-cta');
-    if(cta) cta.style.display=i===n?'inline-block':'none';
-    var badge=el.querySelector('.j-done-badge');
-    if(badge) badge.remove();
-    if(i<n){
-      var done=document.createElement('div');
-      done.className='j-done-badge';
-      done.textContent='Done';
-      el.querySelector('.j-body').appendChild(done);
-    }
+    var card=document.getElementById('jcard-'+i);
+    if(card) card.className='j-card'+(i===journeyStep?' active':'');
   }
-  journeyStep=n;
 }
 
-function advanceJourney(n){
-  setActiveStep(n);
-  var hint=document.getElementById('next-hint');
-  hint.style.display='none';
+function setJStep(n,state){
+  var pill=document.getElementById('jp-'+n);
+  if(pill) pill.className='j-pill '+(state||'');
+  if(n<3){
+    var conn=document.getElementById('jc-'+n);
+    if(conn) conn.className='j-connector'+(state==='done'?' done':'');
+  }
+}
 
-  if(n===2){
-    // Show after-Step-1 instruction inside the step
-    var a1=document.getElementById('j-after-1');
-    if(a1){
-      a1.style.display='block';
-      a1.innerHTML='<div style="margin-top:8px;padding:8px 12px;background:rgba(126,184,160,.08);border-radius:8px;border-left:2px solid var(--observe);font-size:12px;color:#b8b4ae">Memory saved. Now do <strong style="color:var(--observe)">Step 2</strong> — click the button above to ask about your city.</div>';
-    }
-    // Unlock Step 2 CTA
-    var c2=document.getElementById('j-cta-2');
-    if(c2) c2.style.display='inline-block';
+function advanceJourney(toStep){
+  // Mark previous steps done, activate new step
+  for(var i=1;i<toStep;i++) setJStep(i,'done');
+  if(toStep<=3){ setJStep(toStep,'active'); journeyStep=toStep; }
 
-  } else if(n===3){
-    var a2=document.getElementById('j-after-2');
-    if(a2){
-      a2.style.display='block';
-      a2.innerHTML='<div style="margin-top:8px;padding:8px 12px;background:rgba(160,142,201,.08);border-radius:8px;border-left:2px solid var(--reason);font-size:12px;color:#b8b4ae">The agent used memory to personalise your answer. Now for the magic: <strong style="color:var(--reason)">refresh this page</strong>, come back to Stage 3, then do Step 3.</div>';
-    }
-    var c3=document.getElementById('j-cta-3');
-    if(c3) c3.style.display='inline-block';
+  // Hide all cards, show current
+  for(var i=1;i<=3;i++){
+    var card=document.getElementById('jcard-'+i);
+    if(card) card.className='j-card'+(i===toStep?' active':'');
+  }
 
-  } else if(n>3){
-    var a3=document.getElementById('j-after-3');
-    if(a3){
-      a3.style.display='block';
-      a3.innerHTML='<div style="margin-top:8px;padding:8px 12px;background:rgba(201,169,110,.08);border-radius:8px;border-left:2px solid var(--accent);font-size:12px;color:#b8b4ae"><strong style="color:var(--accent)">Journey complete!</strong> You experienced the full memory cycle across 3 steps. Scroll down to see the full explanation.</div>';
+  // Show guidance in the completed step's card
+  var prev=toStep-1;
+  if(prev>=1){
+    var prevCard=document.getElementById('jcard-'+prev);
+    if(prevCard){
+      prevCard.style.display='block';
+      var nxt=document.getElementById('jnext-'+prev);
+      if(nxt){
+        nxt.style.display='block';
+        if(prev===1) nxt.innerHTML='<strong>Memory saved.</strong> Step 2 is now active — ask about the weather where you live.';
+        if(prev===2) nxt.innerHTML='<strong>Done.</strong> Now <strong>refresh this page</strong>, return to Stage 3, and do Step 3 to see memory recall in action.';
+      }
     }
+  }
+
+  if(toStep>3){
+    var c3=document.getElementById('jcard-3');
+    var n3=document.getElementById('jnext-3');
+    if(c3) c3.style.display='block';
+    if(n3){ n3.style.display='block'; n3.innerHTML='<strong>Journey complete!</strong> You experienced all 3 memory stages. Scroll down to see the full breakdown.'; }
+    setJStep(3,'done');
   }
 }
 
 function setJourneyQ(step){
-  if(step===1){
-    document.getElementById('q').value='My name is [your name] and I live in Singapore';
-    document.getElementById('q').select();
-    document.getElementById('q').focus();
-  } else if(step===2){
-    var city=journeyCity||getMemVal('home_city')||'Singapore';
-    document.getElementById('q').value='What is the weather like where I live?';
-  } else if(step===3){
-    document.getElementById('q').value='What do you remember about me?';
-  }
+  var q=document.getElementById('q');
+  if(step===1){ q.value='My name is [your name] and I live in [your city]'; q.setSelectionRange(11,21); }
+  else if(step===2){ q.value='What is the weather like where I live?'; }
+  else if(step===3){ q.value='What do you remember about me?'; }
+  q.focus();
 }
 
 // ── Insight card ──────────────────────────────────────────────────
