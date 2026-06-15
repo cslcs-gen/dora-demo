@@ -106,19 +106,21 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-weight:40
 /* guided journey */
 .journey{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.25rem 1.5rem;margin-bottom:12px;display:none}
 .journey-title{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--reason);font-weight:500;margin-bottom:12px}
-.j-step{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border);opacity:.4;transition:opacity .3s}
-.j-step:last-child{border-bottom:none}
-.j-step.active{opacity:1}
-.j-step.done{opacity:.6}
-.j-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;flex-shrink:0;font-family:var(--fm);border:1px solid var(--border);background:var(--surface2);color:var(--muted)}
-.j-step.active .j-num{background:rgba(160,142,201,.15);border-color:var(--reason);color:var(--reason)}
-.j-step.done .j-num{background:rgba(126,184,160,.15);border-color:var(--observe);color:var(--observe)}
-.j-body{flex:1}
-.j-title{font-size:14px;font-weight:500;color:var(--text);margin-bottom:2px}
-.j-desc{font-size:12px;color:var(--muted);line-height:1.5}
-.j-cta{margin-top:8px;font-size:12px;padding:5px 12px;border-radius:8px;border:1px solid var(--reason);color:var(--reason);background:rgba(160,142,201,.08);cursor:pointer;font-family:var(--fb);display:inline-block}
-.j-cta:hover{background:rgba(160,142,201,.15)}
-.j-done-badge{font-size:11px;color:var(--observe);font-family:var(--fm);margin-top:4px}
+.j-pills{display:flex;gap:8px;margin-bottom:14px}
+.j-pill{flex:1;padding:10px 8px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);text-align:center;cursor:pointer;transition:all .2s}
+.j-pill:hover{border-color:var(--reason)}
+.j-pill.active{border-color:var(--reason);background:rgba(160,142,201,.1)}
+.j-pill.done{border-color:var(--observe);background:rgba(126,184,160,.07)}
+.j-pill-num{font-size:10px;color:var(--muted);font-family:var(--fm);margin-bottom:3px}
+.j-pill.active .j-pill-num{color:var(--reason)}
+.j-pill.done .j-pill-num{color:var(--observe)}
+.j-pill-name{font-size:13px;font-weight:500;color:var(--muted)}
+.j-pill.active .j-pill-name{color:var(--text)}
+.j-pill.done .j-pill-name{color:var(--observe)}
+.j-desc-box{background:var(--surface2);border-radius:10px;padding:12px 14px;border-left:3px solid var(--reason);font-size:13px;color:#c8c4be;line-height:1.7;display:none}
+.j-desc-box.show{display:block}
+.j-desc-box strong{color:var(--reason)}
+.j-desc-box .j-next-hint{margin-top:8px;font-size:12px;color:var(--observe)}
 .j-after{margin-top:4px}
 .footer{text-align:center;font-size:12px;color:var(--muted);padding:2rem;border-top:1px solid var(--border)}
 .footer em{color:var(--accent);font-style:normal}
@@ -185,25 +187,22 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-weight:40
 
   <!-- Stage 3 guided journey -->
   <div class="journey" id="journey">
-    <div class="journey-title">Memory journey &mdash; follow the 3 steps</div>
-    <div class="j-boxes">
-      <div class="j-box" id="jbox-1">
-        <div class="j-box-num">1</div>
-        <div class="j-box-name">Introduction</div>
-        <div class="j-box-desc">Tell the agent your name and city</div>
+    <div class="journey-title">Click the steps in sequence</div>
+    <div class="j-pills">
+      <div class="j-pill active" id="jpill-1" onclick="selectJStep(1)">
+        <div class="j-pill-num">1</div>
+        <div class="j-pill-name">Introduction</div>
       </div>
-      <div class="j-box" id="jbox-2">
-        <div class="j-box-num">2</div>
-        <div class="j-box-name">Memory</div>
-        <div class="j-box-desc">Ask using your saved context</div>
+      <div class="j-pill" id="jpill-2" onclick="selectJStep(2)">
+        <div class="j-pill-num">2</div>
+        <div class="j-pill-name">Memory</div>
       </div>
-      <div class="j-box" id="jbox-3">
-        <div class="j-box-num">3</div>
-        <div class="j-box-name">Recall</div>
-        <div class="j-box-desc">Refresh page &amp; test what it remembers</div>
+      <div class="j-pill" id="jpill-3" onclick="selectJStep(3)">
+        <div class="j-pill-num">3</div>
+        <div class="j-pill-name">Recall</div>
       </div>
     </div>
-    <div class="j-guide" id="j-guide"></div>
+    <div class="j-desc-box show" id="j-desc-box"></div>
   </div>
 
   <div id="sa-wrap" style="display:none">
@@ -255,7 +254,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-weight:40
     <div class="tlbl">Final answer</div>
     <div class="ans" id="ans"></div>
     <div class="stats" id="stats"></div>
-    <div class="token-est" id="token-est" style="display:none"><div class="token-dot"></div><span id="token-text"></span></div>
   </div>
 
   <div class="insight fi" id="insight">
@@ -875,12 +873,13 @@ var TOKEN_EST = {
 
 function showTokenEst(stageN){
   var el=document.getElementById('token-est');
-  var txt=document.getElementById('token-text');
-  if(!el||!txt) return;
+  if(el) el.style.display='none'; // hide the separate token bar
+  var statsEl=document.getElementById('stats');
+  if(!statsEl) return;
   var e=TOKEN_EST[stageN];
-  if(!e){el.style.display='none';return;}
-  el.style.display='flex';
-  txt.textContent='~'+e.tokens+' tokens per run ('+e.cost+' on Claude Sonnet) · '+e.note;
+  if(!e) return;
+  // Append token + cost pills to existing stats row
+  statsEl.innerHTML += '<div class="stat">tokens <span>~'+e.tokens+'</span></div><div class="stat">cost <span>'+e.cost+'</span></div>';
 }
 
 // ── Scroll arrow ──────────────────────────────────────────────────
@@ -901,52 +900,84 @@ setTimeout(checkScroll, 800);
 // ── Journey state ─────────────────────────────────────────────────
 var journeyStep = 1;
 
+var J_DESCS = {
+  1:{
+    text:'<strong>Step 1 - Introduction.</strong> Tell the agent your name and home city. It will call save_memory twice and store both facts in your browser.',
+    hint:'',
+    chips:[['My name is Alex and I live in Tokyo. What is the weather here?','Name + city + weather'],['My name is Sam and I am based in Singapore','Introduce name + city'],['I am Jamie from London, what is the weather there?','Name + city variant']]
+  },
+  2:{
+    text:'<strong>Step 2 - Memory.</strong> Ask about your city or weather. The agent injects your saved name and city into its answer automatically.',
+    hint:'',
+    chips:[['What is the weather like where I live?','Use saved city'],['What is the weather in my home city?','Home city variant'],['Tell me the weather and time where I am based','Weather + time']]
+  },
+  3:{
+    text:'<strong>Step 3 - Recall.</strong> Refresh this page, come back to Stage 3, and ask what the agent remembers. Zero tool calls - pure memory from your browser.',
+    hint:'Tip: Refresh the page first, then click this step.',
+    chips:[['What do you remember about me?','Test recall'],['Tell me what you know about me','Recall variant'],['Who am I?','Short recall']]
+  }
+};
+
 function initJourney(){
   var hasName = getMemVal('name');
   var hasCity = getMemVal('home_city');
   if(hasName && hasCity){
-    setJBox(1,'done'); setJBox(2,'done'); setJBox(3,'active');
+    markJPill(1,'done'); markJPill(2,'done'); markJPill(3,'active');
     journeyStep=3;
-    setGuide(3,'start');
   } else {
-    setJBox(1,'active'); setJBox(2,''); setJBox(3,'');
+    markJPill(1,'active'); markJPill(2,''); markJPill(3,'');
     journeyStep=1;
-    setGuide(1,'start');
   }
+  renderJDesc(journeyStep);
   updateChipsForJourney();
+  setJourneyQ(journeyStep);
 }
 
-function setJBox(n,state){
-  var box=document.getElementById('jbox-'+n);
-  if(!box) return;
-  box.className='j-box'+(state?' '+state:'');
+function markJPill(n,state){
+  var p=document.getElementById('jpill-'+n);
+  if(p) p.className='j-pill'+(state?' '+state:'');
 }
+
+function selectJStep(n){
+  journeyStep=n;
+  for(var i=1;i<=3;i++) markJPill(i, i===n?'active': i<n?'done':'');
+  renderJDesc(n);
+  updateChipsForJourney();
+  setJourneyQ(n);
+}
+
+function renderJDesc(n){
+  var box=document.getElementById('j-desc-box');
+  if(!box) return;
+  var d=J_DESCS[n];
+  if(!d){ box.className='j-desc-box'; return; }
+  box.className='j-desc-box show';
+  var html=d.text;
+  if(d.hint) html+='<div class="j-next-hint">'+d.hint+'</div>';
+  box.innerHTML=html;
+}
+
+function setJBox(n,state){ markJPill(n,state); }
 
 function setGuide(step,phase){
-  var g=document.getElementById('j-guide');
-  if(!g) return;
-  g.className='j-guide show';
-  var stageGuides={
-    1:{start:'<strong>Step 1 - Introduction.</strong> Tell the agent your name and home city. It will save both using the save_memory tool. Use the sample prompt below.',
-       after:'<strong>Step 1 done.</strong> Your name and city are now saved. Use the Step 2 prompt below to continue.'},
-    2:{start:'<strong>Step 2 - Memory.</strong> Ask about the weather where you live. The agent injects your saved facts and addresses you by name. <span class="g-next" onclick="setJourneyQ(2)">Fill prompt</span>',
-       done:'<strong>Step 2 done.</strong> The agent used its memory to personalise your answer. Now <strong>refresh this page</strong>, come back to Stage 3, and try Step 3.'},
-    3:{start:'<strong>Step 3 - Recall.</strong> Ask what the agent remembers. Zero tool calls - pure memory recall from your browser. <span class="g-next" onclick="setJourneyQ(3)">Fill prompt</span>',
-       done:'<strong>Journey complete!</strong> Step 1: 3 tool calls. Step 2: 1 call. Step 3: 0 calls. Each step got faster as memory replaced live fetches.'}
+  var afterMsgs={
+    1:{after:'<strong>Step 1 done.</strong> Name and city saved. Click Step 2 above to continue.'},
+    2:{done:'<strong>Step 2 done.</strong> Memory used. Refresh the page then click Step 3.'},
+    3:{done:'<strong>Journey complete!</strong> Step 1: 3 calls. Step 2: 1 call. Step 3: 0 calls.'}
   };
-  var txt=(stageGuides[step]&&stageGuides[step][phase])||'';
-  g.innerHTML=txt;
+  var box=document.getElementById('j-desc-box');
+  if(!box) return;
+  var msg=(afterMsgs[step]&&afterMsgs[step][phase]);
+  if(msg){ box.className='j-desc-box show'; box.innerHTML=msg; }
 }
 
 function advanceJourney(toStep){
-  for(var i=1;i<toStep;i++) setJBox(i,'done');
-  if(toStep<=3){ setJBox(toStep,'active'); journeyStep=toStep; }
-  else { setJBox(3,'done'); }
-
+  for(var i=1;i<toStep;i++) markJPill(i,'done');
+  if(toStep<=3){ markJPill(toStep,'active'); journeyStep=toStep; }
+  else { markJPill(3,'done'); }
   if(toStep===2) setGuide(1,'after');
   else if(toStep===3) setGuide(2,'done');
   else if(toStep>3) setGuide(3,'done');
-
   updateChipsForJourney();
 }
 
@@ -954,23 +985,18 @@ function updateChipsForJourney(){
   if(stage!==3) return;
   var chipsEl=document.getElementById('chips');
   if(!chipsEl) return;
-  var stepChips={
-    1:[['My name is [your name] and I live in [your city]. What is the weather here?','Step 1 - Introduce yourself']],
-    2:[['What is the weather like where I live?','Step 2 - Ask with memory'],['What is the weather in my home city?','Step 2 - Alternative']],
-    3:[['What do you remember about me?','Step 3 - Test recall'],['Tell me what you know about me','Step 3 - Alternative']]
-  };
-  var chips=stepChips[journeyStep]||stepChips[1];
-  chipsEl.innerHTML=chips.map(function(ch){
-    return '<span class="chip" onclick="setQ(\''+ch[0].replace(/'/g,"\\'")+'\')">'+ch[1]+'</span>';
+  var d=J_DESCS[journeyStep]||J_DESCS[1];
+  chipsEl.innerHTML=d.chips.map(function(ch){
+    var el=document.createElement("span");el.className="chip";el.setAttribute("data-q",ch[0]);el.textContent=ch[1];el.onclick=function(){setQ(this.getAttribute("data-q"));};return el.outerHTML;
   }).join('');
 }
 
 function setJourneyQ(step){
   var q=document.getElementById('q');
-  if(step===1){ q.value='My name is [your name] and I live in [your city]. What is the weather here?'; }
-  else if(step===2){ q.value='What is the weather like where I live?'; }
-  else if(step===3){ q.value='What do you remember about me?'; }
-  q.focus();
+  if(!q) return;
+  if(step===1) q.value='My name is [your name] and I live in [your city]. What is the weather here?';
+  else if(step===2) q.value='What is the weather like where I live?';
+  else if(step===3) q.value='What do you remember about me?';
 }
 
 // ── Insight card ──────────────────────────────────────────────────
