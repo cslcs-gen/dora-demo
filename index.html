@@ -920,24 +920,23 @@ var J_DESCS = {
 };
 
 function initJourney(){
-  var hasName = getMemVal('name');
-  var hasCity = getMemVal('home_city');
+  // Always start fresh — pills reflect what user does THIS session
+  journeyStep=1;
+  markJPill(1,'active');
+  markJPill(2,'');
+  markJPill(3,'');
+  renderJDesc(1);
+  updateChipsForJourney();
+  // If memory exists, mention it in the desc but don't change pill state
+  var hasName=getMemVal('name');
+  var hasCity=getMemVal('home_city');
   if(hasName && hasCity){
-    markJPill(1,'done'); markJPill(2,'done'); markJPill(3,'active');
-    journeyStep=3;
-    // Override desc to explain why steps are already green
     var box=document.getElementById('j-desc-box');
     if(box){
       box.className='j-desc-box show';
-      box.innerHTML='<strong>Steps 1 and 2 already completed.</strong> Memory found: <em>'+hasName+'</em> from <em>'+hasCity+'</em>. You can go back and try Step 1 or 2 again, or proceed with Step 3 to test recall.';
+      box.innerHTML='<strong>Step 1 - Introduction.</strong> Tell the agent your name and home city. It will call save_memory twice and store both facts in your browser.<div class="j-next-hint">Memory from a previous session found: <em>'+hasName+'</em> from <em>'+hasCity+'</em>. You can re-run Step 1 with new details, or jump to Step 3 to test recall.</div>';
     }
-  } else {
-    markJPill(1,'active'); markJPill(2,''); markJPill(3,'');
-    journeyStep=1;
-    renderJDesc(1);
   }
-  updateChipsForJourney();
-  // do NOT auto-fill input — user should click a chip or pill to fill
 }
 
 function markJPill(n,state){
@@ -946,8 +945,17 @@ function markJPill(n,state){
 }
 
 function selectJStep(n){
+  // Clicking a pill only changes which is active — never marks done
+  // Done state is only set by advanceJourney (after execution)
+  for(var i=1;i<=3;i++){
+    if(i===n) markJPill(i,'active');
+    // keep done state if already done, otherwise clear
+    else {
+      var p=document.getElementById('jpill-'+i);
+      if(p && p.className.indexOf('done')===-1) markJPill(i,'');
+    }
+  }
   journeyStep=n;
-  for(var i=1;i<=3;i++) markJPill(i, i===n?'active': i<n?'done':'');
   renderJDesc(n);
   updateChipsForJourney();
   setJourneyQ(n);
@@ -979,9 +987,10 @@ function setGuide(step,phase){
 }
 
 function advanceJourney(toStep){
+  // Mark all completed steps as done, new step as active
   for(var i=1;i<toStep;i++) markJPill(i,'done');
   if(toStep<=3){ markJPill(toStep,'active'); journeyStep=toStep; }
-  else { markJPill(3,'done'); }
+  else { markJPill(3,'done'); journeyStep=4; }
   if(toStep===2) setGuide(1,'after');
   else if(toStep===3) setGuide(2,'done');
   else if(toStep>3) setGuide(3,'done');
